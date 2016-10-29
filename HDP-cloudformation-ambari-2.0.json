@@ -71,7 +71,7 @@
     },
 
     "AWSRegionArch2AMI" : {
-      "us-east-1"      : { "32" : "ami-436a702a", "64" : "ami-8d756fe4", "64HVM" : "NOT_YET_SUPPORTED" }
+      "ap-northeast-1a"      : { "64HVM" : "ami-a21529cc" }
     }
   },
     
@@ -96,32 +96,34 @@
           "#!/bin/bash -v\n",
 
           "# Setup correct file ownership\n",
-          "wget http://public-repo-1.hortonworks.com/ambari/centos6/1.x/updates/1.6.1/ambari.repo -O /etc/yum.repos.d/ambari.repo\n",
+          "# wget http://public-repo-1.hortonworks.com/ambari/centos6/1.x/updates/1.6.1/ambari.repo -O /etc/yum.repos.d/ambari.repo\n",
+          "wget -nv http://public-repo-1.hortonworks.com/ambari/ubuntu14/2.x/updates/2.4.1.0/ambari.list -O /etc/apt/sources.list.d/ambari.list\n",
       
-          "yum install -y ambari-server\n",
+          "apt-key adv --recv-keys --keyserver keyserver.ubuntu.com B9733A7A07513CAD\n",
+          "apt-get update\n",
+          "apt-get install -y ambari-server\n",
 
           "ambari-server setup -s\n",
 
           "ambari-server start\n",
 
-          "yum install -y ambari-agent\n",
+          "apt-get install -y ambari-agent\n",
 
           "ambari-agent start\n",
     
-          "yum -y install ant\n",
 
-          "yum -y install git\n",
+          "apt-get install -y git, ant\n",
 
           "MY_IP=`(curl http://169.254.169.254/latest/meta-data/local-hostname)`\n",
 
           "number_of_slaves=", { "Ref" : "MaximumSlaveNodes" } , "\n",
 
-          "wget https://github.com/varunrao/HDP-deployment/raw/master/multi-node-hdfs-yarn-blueprint.json\n",
+          "wget https://github.com/mehuljn/HDP-deployment/raw/master/multi-node-hdfs-yarn-blueprint.json\n",
 
-          "wget https://github.com/varunrao/HDP-deployment/raw/master/blueprint-cluster-definition.json\n",
+          "wget https://github.com/mehuljn/HDP-deployment/raw/master/blueprint-cluster-definition.json\n",
 
-          "wget https://github.com/varunrao/HDP-deployment/raw/master/wait-for-slaves.sh\n",
-          "wget https://github.com/varunrao/HDP-deployment/raw/master/replace-host-ip-for-cluster.sh\n",
+          "wget https://github.com/mehuljn/HDP-deployment/raw/master/wait-for-slaves.sh\n",
+          "wget https://github.com/mehuljn/HDP-deployment/raw/master/replace-host-ip-for-cluster.sh\n",
 
           "chmod +x wait-for-slaves.sh\n",
 
@@ -131,10 +133,10 @@
 
           "./replace-host-ip-for-cluster.sh $MY_IP\n",
 
-          "curl -u admin:admin -H 'X-Requested-By:Varun' -X POST http://$MY_IP:8080/api/v1/blueprints/multi-node-hdfs-yarn-blueprint -d @multi-node-hdfs-yarn-blueprint.json\n",
+          "curl -u admin:admin -H 'X-Requested-By:MehulJani' -X POST http://$MY_IP:8080/api/v1/blueprints/multi-node-hdfs-yarn-blueprint -d @multi-node-hdfs-yarn-blueprint.json\n",
 
 
-          "curl -u admin:admin -H 'X-Requested-By:Varun' -X POST http://$MY_IP:8080/api/v1/clusters/MyCluster -d @blueprint-cluster-definition.json\n"
+          "curl -u admin:admin -H 'X-Requested-By:MehulJani' -X POST http://$MY_IP:8080/api/v1/clusters/MyCluster -d @blueprint-cluster-definition.json\n"
 
         ]]}}        
       }
@@ -154,10 +156,15 @@
         "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
           "#!/bin/bash -v\n",
           "# Setup correct file ownership\n",
-          "wget http://public-repo-1.hortonworks.com/ambari/centos6/1.x/updates/1.6.1/ambari.repo -O /etc/yum.repos.d/ambari.repo\n",
+          "#wget http://public-repo-1.hortonworks.com/ambari/centos6/1.x/updates/1.6.1/ambari.repo -O /etc/yum.repos.d/ambari.repo\n",
 
-          "yum install -y ambari-agent\n",
+          "#yum install -y ambari-agent\n",
 
+          "wget -nv http://public-repo-1.hortonworks.com/ambari/ubuntu14/2.x/updates/2.4.1.0/ambari.list -O /etc/apt/sources.list.d/ambari.list\n",
+      
+          "apt-key adv --recv-keys --keyserver keyserver.ubuntu.com B9733A7A07513CAD\n",
+          "apt-get update\n",
+          "apt-get install -y ambari-agent\n",
           "# Setup correct file ownership\n",
           "ambari_agent=/etc/ambari-agent/conf/ambari-agent.ini\n",
           "sed -i 's/hostname=.*/hostname=", { "Fn::GetAtt" : [ "MasterNode", "PrivateDnsName" ]}, "/g' $ambari_agent\n",
